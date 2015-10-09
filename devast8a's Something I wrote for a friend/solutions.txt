@@ -1,0 +1,72 @@
+Hedef: browsedevast8a's Something I wrote for a friend
+Link: http://crackmes.de/users/devast8a/something_i_wrote_for_a_friend/
+
+öncelikle uygulamamız çalıştığımızda böyle bir ekran geliyor. Bizden 55 hanelik parola istiyor. o zaman bizde istediğini verelim. Verdik ve aldık ağzımızın payını, yanlış diyor.
+-----------------------------------------------------------------------
+HINT: The password is 55 letters long
+Enter Password: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Sorry, The password was incorrect
+-----------------------------------------------------------------------
+
+o zaman kodlara bir göz atmalıyız. Çok karışık olmayan kodlar karşımıza geliyor. göz attığımızda enter password stringi gözüküyor 012C1138 adresine çağrı yapıyor ve bunun içinde bizden değer aldığı kısımda bulunuyor. Devam ediyoruz ve değerimiz giriyoruz sonrasında 012C1143 - 012C114B arasında kodlar dikkatimi çekiyor. girdiğimiz değeri birşeyle karşılaştırması lazım dimi ama değer nerde. değer aslında stackte xor'lu şeklinde.
+şifrelenmiş metinimizin hex hali 
+
+"2D 1B 02 13 14 1D 5A 17 03 5A 19 1B 08 5A 0D 13 16 16 5A 14 15 0E 5A 08 1F 09 0F 16 0E 5A 13 145A 1F 02 0A 1F 08 0E 5A 08 1B 13 14 13 14 1D"
+zurnanın zırt dediği döngümüz burası. bu hex i 7A hex değeri ile xor işlemine sokuyoruz ve bu döngü 55 kez devam ediyor. 
+----------------------------
+012C1143  |>  803404 7A     /XOR BYTE PTR SS:[ESP+EAX],7A
+012C1147  |.  40            |INC EAX
+012C1148  |.  83F8 37       |CMP EAX,37
+012C114B  |.^ 7C F6         \JL SHORT Crackme.012C1143
+----------------------------
+
+ve bize cevabı veriyor ve deneyim "Congrats you have got the password" cevabını alıyoruz :)
+
+"Waxing my car will not result in expert karate training."
+
+
+
+--------------------------------------------------------------------
+012C1124  |.  E8 A7030000   CALL Crackme.012C14D0
+012C1129  |.  68 1CE42C01   PUSH Crackme.012CE41C                    ;  ASCII "Enter Password: "
+012C112E  |.  E8 9D030000   CALL Crackme.012C14D0
+012C1133  |.  8D4424 48     LEA EAX,DWORD PTR SS:[ESP+48]            ; |
+012C1137  |.  50            PUSH EAX                                 ; |Arg1
+012C1138  |.  E8 9D020000   CALL Crackme.012C13DA                    ; \Crackme.012C13DA
+012C113D  |.  83C4 10       ADD ESP,10
+012C1140  |.  33C0          XOR EAX,EAX
+012C1142  |.  5B            POP EBX
+012C1143  |>  803404 7A     /XOR BYTE PTR SS:[ESP+EAX],7A
+012C1147  |.  40            |INC EAX
+012C1148  |.  83F8 37       |CMP EAX,37
+012C114B  |.^ 7C F6         \JL SHORT Crackme.012C1143
+012C114D  |.  8D0C24        LEA ECX,DWORD PTR SS:[ESP]
+012C1150  |.  8D4424 38     LEA EAX,DWORD PTR SS:[ESP+38]
+012C1154  |>  8A10          /MOV DL,BYTE PTR DS:[EAX]
+012C1156  |.  3A11          |CMP DL,BYTE PTR DS:[ECX]
+012C1158  |.  75 1A         |JNZ SHORT Crackme.012C1174
+012C115A  |.  84D2          |TEST DL,DL
+012C115C  |.  74 12         |JE SHORT Crackme.012C1170
+012C115E  |.  8A50 01       |MOV DL,BYTE PTR DS:[EAX+1]
+012C1161  |.  3A51 01       |CMP DL,BYTE PTR DS:[ECX+1]
+012C1164  |.  75 0E         |JNZ SHORT Crackme.012C1174
+012C1166  |.  83C0 02       |ADD EAX,2
+012C1169  |.  83C1 02       |ADD ECX,2
+012C116C  |.  84D2          |TEST DL,DL
+012C116E  |.^ 75 E4         \JNZ SHORT Crackme.012C1154
+012C1170  |>  33C0          XOR EAX,EAX
+012C1172  |.  EB 05         JMP SHORT Crackme.012C1179
+012C1174  |>  1BC0          SBB EAX,EAX
+012C1176  |.  83D8 FF       SBB EAX,-1
+012C1179  |>  85C0          TEST EAX,EAX
+012C117B  |.  75 07         JNZ SHORT Crackme.012C1184
+012C117D  |.  68 30E42C01   PUSH Crackme.012CE430                    ;  ASCII "Congrats you have got the password
+"
+012C1182  |.  EB 05         JMP SHORT Crackme.012C1189
+012C1184  |>  68 54E42C01   PUSH Crackme.012CE454                    ;  ASCII "Sorry, The password was incorrect
+"
+012C1189  |>  E8 42030000   CALL Crackme.012C14D0
+012C118E  |.  83C4 04       ADD ESP,4
+012C1191  |.  68 78E42C01   PUSH Crackme.012CE478                    ;  ASCII "pause"
+
+----------------------------------------------------------------------------

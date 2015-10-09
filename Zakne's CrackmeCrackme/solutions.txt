@@ -1,0 +1,100 @@
+Hedef:Zakne's Crackme:Crackme #2 by ZaKne
+link: http://crackmes.de/users/zakne/crackmecrackme_2_by_zakne/
+
+Her zaman uygulamaya girişmeden önce bir göz atmalıyız. Bizden ne istiyor ve verdiği sonuçlara dikkat etmeliyiz.
+Uygulamamızı çalıştırıyoruz ve bizden login için isim ve parola istiyor. hemen birşeyler deneylim ve sonucu görelim.
+
+----------------------
+Enter your login:fatih
+Enter your password:1234
+Sorry,uncorrect password,try again...
+-----------------------
+
+bu sonucu aldıktan sonra hemen debug edelim bakalım arka planda neler dönüyormuş. 
+ilk bakışta klasik kod parçalarımız stringler ve ekrana çıkartma fonksiyonları sonra bizden değer alma fonksiyonları falan. bunlar tamam sorun yok. Kodlara bakmaya devam ettiğimizde girilen strinlerin karşılaştırılması için strcmp yi gördüm. hemen bir breakpoint koyalım.
+
+------------------------
+0040153B  |> \8D85 08FFFFFF LEA EAX,DWORD PTR SS:[EBP-F8]            ; ||
+00401541  |.  8D95 F8FCFFFF LEA EDX,DWORD PTR SS:[EBP-308]           ; ||
+00401547  |.  894424 04     MOV DWORD PTR SS:[ESP+4],EAX             ; ||
+0040154B  |.  891424        MOV DWORD PTR SS:[ESP],EDX               ; ||
+0040154E  |.  E8 8D050000   CALL <JMP.&msvcrt.strcmp>                ; |\strcmp
+
+-------------------------
+
+Aşağıdaki kodlardada bilgisayarınızın ismini alıyor.
+------------------------------------------------------
+004012BE  |.  E8 AD030000   CALL crackme.00401670
+004012C3  |.  C745 E4 10000>MOV DWORD PTR SS:[EBP-1C],10             ; |
+004012CA  |.  8D45 E4       LEA EAX,DWORD PTR SS:[EBP-1C]            ; |
+004012CD  |.  894424 04     MOV DWORD PTR SS:[ESP+4],EAX             ; |
+004012D1  |.  8D45 E8       LEA EAX,DWORD PTR SS:[EBP-18]            ; |
+004012D4  |.  890424        MOV DWORD PTR SS:[ESP],EAX               ; |
+004012D7  |.  E8 C4080000   CALL <JMP.&KERNEL32.GetComputerNameA>    ; \GetComputerNameA
+--------------------------------------------------------
+
+
+İsim ve parola girişi yaptık ve breakpointte durdu ve gözümüze bu çarptı. Edx in içinde girdiğimiz şifre var ama eax nedir doğru parola bu mu denemek isteyebilirsiniz.
+aslında bu değişen bir parola girilen isme göre.
+---------------------------
+EAX 0022FE40 ASCII "B5QMDERN0QW7A7AM567AM56457AM5645EN7AM5645ENVD"
+EDX 0022FC30 ASCII "1234"
+----------------------------
+fatih denemiştik bide fatihh denediğimizde ne çıkacak bakın.
+
+B5QMDERN0QWQW7A7AM567AM56457AM5645EN7AM5645ENVD -- fatihh
+B5QMDERN0QW7A7AM567AM56457AM5645EN7AM5645ENVD   -- fatih
+
+gördüğünüz gibi bir değer daha eklendi demekki harfleri teker teker birşeyle değiştiriyor ve şifre yapıyor.
+
+şimdi bir göz attığımızda hex dump a bu karakterleri ayrı ayrı görüyoruz.
+
+004020C0                          51 4D 44 00 57 36 00 00          QMD.W6..
+004020D0  4A 38 00 00 44 32 00 00 53 34 00 00 42 35 00 00  J8..D2..S4..B5..
+004020E0  47 4D 32 00 51 57 00 00 4E 30 00 00 48 4A 00 00  GM2.QW..N0..HJ..
+004020F0  52 43 00 00 44 55 00 00 54 38 4C 00 4A 4B 00 00  RC..DU..T8L.JK..
+00402100  44 37 00 00 45 34 00 00 38 44 38 00 42 50 00 00  D7..E4..8D8.BP..
+00402110  55 51 37 00 45 52 00 00 46 4A 36 00 4C 5A 00 00  UQ7.ER..FJ6.LZ..
+00402120  44 53 31 00 54 37 00 00 58 30 00 00 4B 4A 30 00  DS1.T7..X0..KJ0.
+00402130  4F 50 00 00 4C 30 00 00 50 51 00 00 44 4A 00 00  OP..L0..PQ..DJ..
+00402140  56 43 00 00 37 42 00 00 53 59 00 00 4C 51 00 00  VC..7B..SY..LQ..
+00402150  32 31 00 00 36 54 00 00 4E 44 00 00 4B 49 00 00  21..6T..ND..KI..
+00402160  30 39 00 00 52 54 00 00 45 52 00 00 46 4A 36 00  09..RT..ER..FJ6.
+00402170  4C 5A 00 00 44 53 31 00 54 37 00 00 58 30 00 00  LZ..DS1.T7..X0..
+00402180  4B 4A 30 00 4F 50 00 00 4C 30 00 00 50 51 00 00  KJ0.OP..L0..PQ..
+00402190  51 4D 44 00 57 36 00 00 4A 38 00 00 44 32 00 00  QMD.W6..J8..D2..
+004021A0  53 34 00 00 42 35 00 00 47 4D 32 00 51 57 00 00  S4..B5..GM2.QW..
+004021B0  4E 30 00 00 48 4A 00 00 52 43 00 00 53 59 31 00  N0..HJ..RC..SY1.
+004021C0  4C 51 33 00 32 31 00 00 36 54 00 00 4E 44 00 00  LQ3.21..6T..ND..
+004021D0  4B 49                                            KI
+
+
+004023E0                          54 59 00 00 4B 4A 00 00          TY..KJ..
+004023F0  33 49 00 00 44 41 00 00 38 37 00 00 34 35 00 00  3I..DA..87..45..
+00402400  4D 4C 00 00 51 57 00 00 34 52 00 00 30 45 00 00  ML..QW..4R..0E..
+00402410  46 37 00 00 35 48 00 00 4D 54 00 00 50 4F 00 00  F7..5H..MT..PO..
+00402420  4A 48 00 00 32 42 00 00 4D 51 00 00 4C 4C 00 00  JH..2B..MQ..LL..
+00402430  30 30 00 00 45 52 00 00 33 38 00 00 4D 34 00 00  00..ER..38..M4..
+00402440  37 41 00 00 58 5A 00 00 56 44 00 00 4B 30 00 00  7A..XZ..VD..K0..
+00402450  45 4E 00 00 47 52 00 00 55 4A 00 00 46 47 00 00  EN..GR..UJ..FG..
+00402460  33 4E 00 00 57 32 00 00 4D 30 00 00 38 33 00 00  3N..W2..M0..83..
+00402470  52 54 00 00 39 58 00 00 46 32 00 00 55 34 00 00  RT..9X..F2..U4..
+00402480  47 4D 00 00 4D 35 36 00 54 59 00 00 4B 4A 00 00  GM..M56.TY..KJ..
+00402490  32 42 00 00 4D 51 00 00 4C 4C 00 00 30 30 00 00  2B..MQ..LL..00..
+004024A0  45 52 00 00 33 38 00 00 4D 34 00 00 37 41 00 00  ER..38..M4..7A..
+004024B0  58 5A 00 00 56 44 00 00 4B 30 00 00 45 4E 00 00  XZ..VD..K0..EN..
+004024C0  47 52 00 00 33 49 00 00 44 41 00 00 38 37 00 00  GR..3I..DA..87..
+004024D0  34 35 00 00 4D 4C 00 00 51 57 00 00 34 52 00 00  45..ML..QW..4R..
+004024E0  30 45 00 00 46 37 00 00 35 48 00 00 4D 54        0E..F7..5H..MT
+
+Bunları bulduk. fatih string i ile B5QMDERN0QW7A7AM567AM56457AM5645EN7AM5645ENVD baktığımızda bunlar a b c d şeklinde alfabatik olarak sıralanmış o zaman çözümleyen hemen bir python kodu yazalım 
+
+------------
+Enter your login:fatih
+Enter your password:B5QMDERN0QW7A7AM567AM56457AM5645EN7AM5645ENVD
+Good job man!,now make a keygen:))
+------------
+
+ that's finish :)
+
+

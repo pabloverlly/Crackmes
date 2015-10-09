@@ -1,0 +1,8 @@
+Targer:LuCiFeR's First C++ Crackme
+Link: http://www.crackmes.de/users/lucifer/first_c_crackme/
+
+The fld instruction loads a 32 bit, 64 bit, or 80 bit floating point value onto the stack. This instruction converts 32 and 64 bit operand to an 80 bit extended precision value before pushing the value onto the floating point stack.
+
+The fild (integer load) instruction converts a 16, 32, or 64 bit two's complement integer to the 80 bit extended precision format and pushes the result onto the stack.
+
+https://courses.engr.illinois.edu/ece390/books/artofasm/CH14/CH14-4.html#HEADING4-37
